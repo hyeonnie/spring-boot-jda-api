@@ -5,18 +5,18 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.example.demo.listener.PingPongListener;
-
 import lombok.Getter;
 import lombok.Setter;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.hooks.EventListener;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.OnlineStatus;
+import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.cache.CacheFlag;
 
 @Configuration
 @EnableConfigurationProperties(DiscordConfig.Properties.class)
-public class DiscordConfig extends ListenerAdapter {
+public class DiscordConfig {
 
 	private final Properties properties;
 	
@@ -28,13 +28,11 @@ public class DiscordConfig extends ListenerAdapter {
 	public JDA jda() throws Exception {
 		JDA jda = JDABuilder
 				.createDefault(properties.getBot().getToken())
+				.setRawEventsEnabled(true)
+				.setStatus(OnlineStatus.ONLINE)
+				.setActivity(Activity.playing(properties.getBot().getActivity()))
 				.build();
-		jda.addEventListener(pingPongEventListener());
 		return jda;
-	}
-	
-	public EventListener pingPongEventListener() {
-		return new PingPongListener();
 	}
 	
 	@Getter @Setter
@@ -46,6 +44,7 @@ public class DiscordConfig extends ListenerAdapter {
 		@Getter @Setter
 		public static class Bot {
 			private String token;
+			private String activity;
 		}
 		
 	}
